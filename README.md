@@ -2,10 +2,36 @@
 
 This integration retrieves data from the [iSolarCloud API](https://developer-api.isolarcloud.com/) provided by Sungrow.
 
+Integration is based on the [pysolarcloud](https://github.com/bugjam/pysolarcloud) library.
+
 ## Status
 This integration is quite new and might still have bugs. It runs on my HomeAssistant installation but it is not a "proven" product yet.
 
 The iSolarCloud API itself is also new and does not seem very mature. Their OAuth2 implementation required some workarounds, I will document more details on them soon.
+
+## Sensors
+
+The integration will add one device to your HomeAssistant, representing your Sungrow plant. The following sensors are added to the device:
+
+### Energy sensors (in Wh)
+* Battery charge energy
+* Battery dischange energy
+* Consumed energy
+* Purchased energy
+* Feed-in energy
+* Produced energy
+* Direct consumption
+
+The energy sensors can be used in HomeAssistant's [Energy Dashboard](https://www.home-assistant.io/docs/energy/).
+
+### Battery sensor (in %)
+* Battery level
+
+### Power sensors (in W)
+* Load power
+* Power flow (This is not explained well in the Sungrow documentation. It seems like it is the net power through the inverter, ie. current solar production +/- battery (dis)charge)
+
+It's possible that other plant types offer different data points which may require changes to the integration. The current configuration is based on my own SH8.0RT-V112 plant.
 
 ## Configuration
 
