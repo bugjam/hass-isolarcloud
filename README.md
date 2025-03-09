@@ -11,8 +11,9 @@ The iSolarCloud API itself is also new and does not seem very mature. Their OAut
 
 1. Create an account in the [Sungrow Developer Portal](https://developer-api.isolarcloud.com/)
 2. Create a new app
-3. Wait for Sungrow to approve your app
-4. When the app is approved, you can find the needed configuration details in the devloper portal
+3. Enable the "Authorize with OAuth2.0" setting and enter this Redirect URI: `https://bounce.e-dreams.dk/isolarcloud/` (See explanation below)
+4. Wait for Sungrow to approve your app
+5. When the app is approved, you can find the needed configuration details in the devloper portal
 
 ## Installation
 
@@ -29,3 +30,14 @@ The integration can be installed with [HACS](https://hacs.xyz):
 7. HomeAssistant will show a button to navigate to iSolarCloud
 8. Log in and select the plant you want to fetch data for
 9. You will be redirected back to [My Home Assistant](https://www.home-assistant.io/integrations/my/)
+
+## OAuth2 flow
+
+The iSolarCloud API supports OAuth2 but unfortunately does not quite follow the standard: The server is expected to 
+return the `state` parameter to HomeAssistant when authorisation is completed but this parameter is missing.
+To overcome this, I have added a script on my own server which temporarily stores the `state` in a cookie
+and adds the missing parameter back to the request.
+The script can be found here: [https://github.com/bugjam/hass-isolarcound/bounce/index.php].
+
+(The script does not store the authorisation code. And even if I could get hold of it, I could use it without
+knowing your appkey and secret key.)
