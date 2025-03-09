@@ -37,7 +37,7 @@ The iSolarCloud API supports OAuth2 but unfortunately does not quite follow the 
 return the `state` parameter to HomeAssistant when authorisation is completed but this parameter is missing.
 To overcome this, I have added a script on my own server which temporarily stores the `state` in a cookie
 and adds the missing parameter back to the request.
-The script can be found here: [https://github.com/bugjam/hass-isolarcound/bounce/index.php].
+The script can be found here: [https://github.com/bugjam/hass-isolarcloud/blob/main/bounce/index.php].
 
-(The script does not store the authorisation code. And even if I could get hold of it, I could use it without
+(The script does not store your authorisation code. And even if I could get hold of it, I could use it without
 knowing your appkey and secret key.)
