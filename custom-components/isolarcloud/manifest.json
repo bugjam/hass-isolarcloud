@@ -1,0 +1,20 @@
+{
+  "domain": "isolarcloud",
+  "name": "iSolarCloud",
+  "codeowners": [
+    "@bugjam"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "application_credentials"
+  ],
+  "documentation": "https://github.com/bugjam/hass-isolarcloud/",
+  "issue_tracker": "https://github.com/bugjam/hass-isolarcloud/issues",
+  "homekit": {},
+  "iot_class": "cloud_polling",
+  "requirements": [ "pysolarcloud==0.1.0" ],
+  "loggers": [ "pysolarcloud" ],
+  "ssdp": [],
+  "version": "0.1.0",
+  "zeroconf": []
+}

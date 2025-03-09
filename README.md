@@ -1,0 +1,1 @@
+# iSolarCloud integration for HomeAssistant
