@@ -65,6 +65,9 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
                 cloud_id = 3
             case Server.Australia.value:
                 cloud_id = 4
+            case _:
+                _LOGGER.error("Unknown server: %s", self.server)
+                raise ConfigEntryAuthFailed(f"Unknown server: {self.server}")
         url = str(
             URL(self.redirect_uri).with_query(
                 {
@@ -108,8 +111,10 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
 async def async_get_auth_implementation(hass: HomeAssistant, auth_domain, credential):
     """Get the iSolarCloud OAuth2 implementation."""
     config_entry = hass.config_entries.async_get_entry(auth_domain)
-    if config_entry and "server" in config_entry.data:
+    if config_entry:
         server = config_entry.data["server"]
+    elif DOMAIN in hass.data:
+        server = hass.data[DOMAIN]["server"]
     else:
         server = None
     _LOGGER.debug(
