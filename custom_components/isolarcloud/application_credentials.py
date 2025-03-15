@@ -108,10 +108,8 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
 async def async_get_auth_implementation(hass: HomeAssistant, auth_domain, credential):
     """Get the iSolarCloud OAuth2 implementation."""
     config_entry = hass.config_entries.async_get_entry(auth_domain)
-    if config_entry:
+    if config_entry and "server" in config_entry.data:
         server = config_entry.data["server"]
-    elif DOMAIN in hass.data:
-        server = hass.data[DOMAIN]["server"]
     else:
         server = None
     _LOGGER.debug(

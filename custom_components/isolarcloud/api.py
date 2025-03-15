@@ -30,7 +30,7 @@ class AsyncConfigEntryAuth(pysolarcloud.AbstractAuth):
             app_id,
         )
         self._oauth_session = oauth_session
-        oauth_session.implementation.server = server
+        oauth_session.implementation.host = server
         self.plant = plant
         self.api = Plants(self)
 
