@@ -1,0 +1,65 @@
+{
+  "config": {
+    "step": {
+      "pick_implementation": {
+        "title": "[%key:common::config_flow::title::oauth2_pick_implementation%]"
+      }
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_account%]",
+      "already_in_progress": "[%key:common::config_flow::abort::already_in_progress%]",
+      "oauth_error": "[%key:common::config_flow::abort::oauth2_error%]",
+      "oauth_failed": "[%key:common::config_flow::abort::oauth2_failed%]",
+      "oauth_timeout": "[%key:common::config_flow::abort::oauth2_timeout%]",
+      "oauth_unauthorized": "[%key:common::config_flow::abort::oauth2_unauthorized%]",
+      "missing_configuration": "[%key:common::config_flow::abort::oauth2_missing_configuration%]",
+      "authorize_url_timeout": "[%key:common::config_flow::abort::oauth2_authorize_url_timeout%]",
+      "no_url_available": "[%key:common::config_flow::abort::oauth2_no_url_available%]",
+      "user_rejected_authorize": "[%key:common::config_flow::abort::oauth2_user_rejected_authorize%]"
+    },
+    "create_entry": {
+      "default": "[%key:common::config_flow::create_entry::authenticated%]"
+    },
+    "user": {
+      "title": "Vælg server",
+      "description": "Vælg den server, du vil oprette forbindelse til",
+      "data": {
+        "server": "iSolarCloud server"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "feed_in_energy_total": {
+        "name": "Energi til elnettet"
+      },
+      "cumulative_discharge": {
+        "name": "Afladning"
+      },
+      "energy_storage_cumulative_charge": {
+        "name": "Opladning"
+      },
+      "total_purchased_energy": {
+        "name": "Energi fra elnettet"
+      },
+      "total_load_consumption": {
+        "name": "Forbrug"
+      },
+      "total_yield": {
+        "name": "Produktion"
+      },
+      "total_direct_energy_consumption": {
+        "name": "Direkte forbrug"
+      },
+      "power": {
+        "name": "Strømflow"
+      },
+      "load_power": {
+        "name": "Belastning"
+      },
+      "battery_level_soc": {
+        "name": "Batteriniveau"
+      }
+    }
+  }
+}
