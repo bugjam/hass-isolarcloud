@@ -1,0 +1,16 @@
+{
+    "import_historical_data": {
+      "name": "Importer historiske energidata",
+      "description": "Importer energiforbrugsdata fra iSolarCloud API for en bestemt periode. (Bemærk: Det kan tage lidt tid at hente data for en længere periode.",
+      "fields": {
+        "start": {
+          "name": "Starttidspunkt",
+          "description": "Start for den periode, hvor data skal importeres."
+        },
+        "end": {
+          "name": "Sluttidspunkt",
+          "description": "Slut for den periode, hvor data skal importeres."
+        }
+      }
+    }
+  }

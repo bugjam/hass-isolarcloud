@@ -7,7 +7,7 @@ Integration is based on the [pysolarcloud](https://github.com/bugjam/pysolarclou
 ## Status
 This integration is quite new and might still have bugs. It runs on my HomeAssistant installation but it is not a "proven" product yet.
 
-The iSolarCloud API itself is also new and does not seem very mature. Their OAuth2 implementation required some workarounds, I will document more details on them soon.
+The iSolarCloud API itself is also new and does not seem very mature. Their OAuth2 implementation required some workarounds as explained [below](#oauth2-flow).
 
 ## Sensors
 
@@ -67,3 +67,14 @@ The script can be found here: [https://github.com/bugjam/hass-isolarcloud/blob/m
 
 (The script does not store your authorisation code. And even if I could get hold of it, I could use it without
 knowing your appkey and secret key.)
+
+## Importing historical data
+
+The integration can fetch energy data from iSolarCloud to make statistics available in HomeAssistant, e.g. from before the integration was installed or in case your HomeAssistant has been offline.
+
+Data will be imported in 1-hour intervals. Import is available for data before today's date.
+
+The import can be initiated from [Developer Tools](https://my.home-assistant.io/redirect/developer_services/):
+![Screenshot of Developer Tools](img/developer_tools.png)
+
+*Note:* Imported data may appear to be 1 hour off in the Energy Dashboard, e.g. the energy consumed between 09:00 and 10:00 appears in the "10:00-11:00" column in the dashboard. This is because HomeAssistant attributes the value for 10:00 to the 10:00-11:00 in the visual presentation, even though the energy was really used in the previous hour. The underlying data is stored correctly, it's just the visualization which is off.

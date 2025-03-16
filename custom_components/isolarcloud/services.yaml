@@ -1,0 +1,16 @@
+import_historical_data:
+  name: Import historical energy data
+  description: "Backfill energy usage statistics from iSolarCloud API. (Note: This can take a while if you select a long date interval.)"
+  fields:
+    start:
+      name: Start time
+      description: Start of the time period to import statistics for.
+      required: true
+      selector:
+        datetime:
+    end:
+      name: End time
+      description: End of the time period to import statistics for.
+      required: true
+      selector:
+        datetime:
