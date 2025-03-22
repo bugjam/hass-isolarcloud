@@ -12,9 +12,13 @@
   "issue_tracker": "https://github.com/bugjam/hass-isolarcloud/issues",
   "homekit": {},
   "iot_class": "cloud_polling",
-  "requirements": [ "pysolarcloud==0.2.1" ],
-  "loggers": [ "pysolarcloud" ],
+  "requirements": [
+    "pysolarcloud==0.2.1"
+  ],
+  "loggers": [
+    "pysolarcloud"
+  ],
   "ssdp": [],
-  "version": "0.4.0",
+  "version": "0.4.1",
   "zeroconf": []
 }
