@@ -18,7 +18,8 @@
       "user_rejected_authorize": "[%key:common::config_flow::abort::oauth2_user_rejected_authorize%]"
     },
     "create_entry": {
-      "default": "[%key:common::config_flow::create_entry::authenticated%]"
+      "default": "[%key:common::config_flow::create_entry::authenticated%]",
+      "reauth_successful": "[%key:common::config_flow::create_entry::authenticated%]"
     },
     "user": {
       "title": "Select server",

@@ -50,6 +50,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ISolarCloudConfigEntry) 
         entry.data["client_secret"],
         entry.data["plant"],
     )
+    # Get an access - trigger token refresh or reauthentcation if needed
+    await entry.runtime_data.async_get_access_token()
 
     await hass.config_entries.async_forward_entry_setups(entry, _PLATFORMS)
 

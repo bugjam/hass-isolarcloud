@@ -56,8 +56,10 @@ class OAuth2FlowHandler(
         await self.async_set_unique_id(str(plant))
         if self.source == config_entries.SOURCE_REAUTH:
             self._abort_if_unique_id_mismatch(reason="plant_id_mismatch")
-            self.hass.config_entries.async_update_entry(self.entry, data=d)
-            return self.async_abort(reason="reauth_successful")
+            self.logger.info(
+                "async_oauth_create_entry callled with sourece=REAUTH and data=%s", d
+            )
+            return self.async_update_reload_and_abort(self._get_reauth_entry(), data=d)
         self.logger.info("async_oauth_create_entry callled with data=%s", d)
         return self.async_create_entry(title=self.flow_impl.name, data=d)
 
