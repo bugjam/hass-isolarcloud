@@ -65,8 +65,7 @@ To overcome this, I have added a script on my own server which temporarily store
 and adds the missing parameter back to the request.
 The script can be found here: [https://github.com/bugjam/hass-isolarcloud/blob/main/bounce/index.php].
 
-(The script does not store your authorisation code. And even if I could get hold of it, I could use it without
-knowing your appkey and secret key.)
+(The script does not store your authorisation code. And even if I could get hold of it, I could not use it without knowing your appkey and secret key.)
 
 ## Importing historical data
 
