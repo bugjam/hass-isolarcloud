@@ -4,16 +4,22 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timedelta
-from functools import lru_cache
+from functools import lru_cache, partial
 from itertools import groupby
 import logging
+from sqlite3 import DatabaseError
 
 from pysolarcloud import PySolarCloudException
 from pysolarcloud.plants import Plants
 import voluptuous as vol
 
+from homeassistant.components.recorder import get_instance
 from homeassistant.components.recorder.models import StatisticData, StatisticMetaData
-from homeassistant.components.recorder.statistics import async_import_statistics
+from homeassistant.components.recorder.statistics import (
+    SQLAlchemyError,
+    async_import_statistics,
+    statistics_during_period,
+)
 from homeassistant.components.sensor import (
     HomeAssistantError,
     SensorDeviceClass,
@@ -31,7 +37,7 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
-from homeassistant.util.dt import as_local, as_utc, start_of_local_day
+from homeassistant.util.dt import as_local, as_utc, now, start_of_local_day
 
 from .const import DOMAIN
 
@@ -82,12 +88,11 @@ async def async_setup_entry(
         end = as_local(call.data["end"])
         adjusted = False
         midnight_today = as_local(start_of_local_day())
-        _LOGGER.debug("end=%s midnight_today=%s", end, midnight_today)
         if end > midnight_today:
             end = midnight_today
             adjusted = True
 
-        imported_count = await coordinator.import_historical_data(start, end)
+        imported_count = await coordinator.async_import_historical_data(start, end)
         result_msg = f"Imported {imported_count} statistics from {start} to {end}."
         if adjusted:
             result_msg += " Note: End time was adjusted as the API supports only data before the current day."
@@ -101,6 +106,7 @@ async def async_setup_entry(
             {
                 vol.Required("start"): cv.datetime,
                 vol.Required("end"): cv.datetime,
+                vol.Optional("delete", default=False): cv.boolean,
             }
         ),
     )
@@ -262,11 +268,22 @@ class Coordinator(DataUpdateCoordinator):
         except PySolarCloudException as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
 
-    async def import_historical_data(self, start: datetime, end: datetime):
+    async def async_import_historical_data(
+        self, start: datetime, end: datetime, delete: bool = False
+    ) -> int:
         """Import historical data."""
         interval_length = int(timedelta(hours=3).total_seconds())
         period = end - start
         intervals = range(int(period.total_seconds()) // interval_length)
+        if delete:
+            for sensor in ENERGY_SENSORS:
+                await self.async_delete_statistics_range(
+                    self.get_entity_id(f"{self.plant_id}_{sensor}"), start, end
+                )
+        baselines = await self.get_baselines(ENERGY_SENSORS)
+        if None in baselines.values():
+            _LOGGER.error("Could not get baseline values for all sensors")
+            return 0
         n = 0
         for i in intervals:
             start_time = start + timedelta(seconds=i * interval_length)
@@ -288,11 +305,15 @@ class Coordinator(DataUpdateCoordinator):
             data.sort(key=lambda x: x["code"])
             hist = groupby(data, key=lambda x: x["code"])
             for sensor, frames in hist:
+                baseline = baselines[sensor]
+                _LOGGER.debug(
+                    "Adjusting value for %s with baseline %f", sensor, baseline
+                )
                 fs = list(frames)
                 stats = [
                     StatisticData(
                         start=as_utc(as_local(f["timestamp"])),
-                        sum=f["value"],
+                        sum=f["value"] - baseline,
                         state=f["value"],
                     )
                     for f in fs
@@ -312,6 +333,84 @@ class Coordinator(DataUpdateCoordinator):
                 n += len(stats)
         return n
 
+    async def get_baselines(self, sensors) -> dict[str, float | None]:
+        """Get baseline values for all energy sensors."""
+        # Get all entity IDs first
+        entity_ids = []
+        sensor_map = {}  # Map entity_ids back to sensor names
+        for sensor in sensors:
+            entity_id = self.get_entity_id(f"{self.plant_id}_{sensor}")
+            if entity_id:
+                entity_ids.append(entity_id)
+                sensor_map[entity_id] = sensor
+
+        if not entity_ids:
+            return {}
+
+        # Get statistics for all sensors
+        start_time = now() - timedelta(days=1)
+        stats = await self.hass.async_add_executor_job(
+            partial(
+                statistics_during_period,
+                self.hass,
+                start_time=start_time,
+                end_time=None,
+                statistic_ids=entity_ids,
+                period="hour",
+                units=None,
+                types=["sum", "state"],
+            )
+        )
+
+        # Process results for each sensor
+        baselines = {}
+        for entity_id in entity_ids:
+            sensor_stats = stats.get(entity_id)
+            if not sensor_stats:
+                baselines[sensor_map[entity_id]] = None
+                continue
+
+            latest_entry = sensor_stats[-1]
+            latest_sum = latest_entry.get("sum")
+            latest_state = latest_entry.get("state")
+
+            if latest_sum is None or latest_state is None:
+                baselines[sensor_map[entity_id]] = None
+                continue
+
+            try:
+                baseline = float(latest_state) - float(latest_sum)
+                _LOGGER.debug(
+                    "Calculated baseline for %s: state=%.2f, sum=%.2f → baseline=%.2f",
+                    entity_id,
+                    latest_state,
+                    latest_sum,
+                    baseline,
+                )
+                baselines[sensor_map[entity_id]] = baseline
+            except (TypeError, ValueError):
+                _LOGGER.error(
+                    "Could not calculate baseline for %s: state=%s, sum=%s",
+                    entity_id,
+                    latest_state,
+                    latest_sum,
+                )
+                baselines[sensor_map[entity_id]] = None
+
+        return baselines
+
+    async def async_delete_statistics_range(
+        self, statistic_id: str, start_time: datetime, end_time: datetime
+    ):
+        """Delete existing statistics rows for a statistic_id in a given time range."""
+        await get_instance(self.hass).async_add_executor_job(
+            _delete_statistics_range_blocking,
+            self.hass,
+            statistic_id,
+            start_time,
+            end_time,
+        )
+
     @lru_cache
     def get_entity_id(self, unique_id):
         """Get the entity id of a sensor."""
@@ -319,3 +418,54 @@ class Coordinator(DataUpdateCoordinator):
         return entity_registry.async_get_entity_id(
             domain="sensor", platform=DOMAIN, unique_id=unique_id
         )
+
+
+async def _delete_statistics_range_blocking(
+    hass: HomeAssistant, statistic_id: str, start_time: datetime, end_time: datetime
+):
+    """Delete existing statistics rows for a statistic_id in a given time range.
+
+    This method is blocking and should be run in a separate thread with async_add_executor_job.
+    """
+    # NOTE: This function runs inside executor thread, but HA may still warn about
+    #       "Detected code that accesses the database without the database executor"
+    #       due to SQLAlchemy internals. This is a known issue and can be ignored.
+    db = get_instance(hass).async_get_database_engine()
+    connection = db.raw_connection()
+
+    try:
+        cursor = connection.cursor()
+        start_ts = start_time.timestamp()
+        end_ts = end_time.timestamp()
+
+        # Get metadata_id from statistics_meta
+        cursor.execute(
+            "SELECT id FROM statistics_meta WHERE statistic_id = ?", (statistic_id,)
+        )
+        result = cursor.fetchone()
+        if not result:
+            _LOGGER.warning("No metadata_id found for statistic_id %s", statistic_id)
+            return
+
+        metadata_id = result[0]
+        _LOGGER.warning(
+            "Deleting statistics for metadata_id %s between %s and %s",
+            metadata_id,
+            start_time,
+            end_time,
+        )
+
+        # Delete rows in statistics table for that metadata_id and time range
+        cursor.execute(
+            "DELETE FROM statistics WHERE metadata_id = ? AND start_ts >= ? AND start_ts < ?",
+            (metadata_id, start_ts, end_ts),
+        )
+        connection.commit()
+        _LOGGER.debug("Deletion completed")
+
+    except (SQLAlchemyError, DatabaseError) as e:
+        _LOGGER.error("Error while deleting statistics", exc_info=e)
+        connection.rollback()
+    finally:
+        cursor.close()
+        connection.close()

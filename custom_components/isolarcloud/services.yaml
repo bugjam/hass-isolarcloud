@@ -14,3 +14,9 @@ import_historical_data:
       required: true
       selector:
         datetime:
+    delete:
+      name: Delete existing data
+      description: Delete existing data for the selected time period before importing new data.
+      required: false
+      selector:
+        boolean:

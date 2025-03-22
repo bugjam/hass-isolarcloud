@@ -72,9 +72,12 @@ knowing your appkey and secret key.)
 
 The integration can fetch energy data from iSolarCloud to make statistics available in HomeAssistant, e.g. from before the integration was installed or in case your HomeAssistant has been offline.
 
+[!CAUTION]
+Data import is still in an experimental state.
+
 Data will be imported in 1-hour intervals. Import is available for data before today's date.
 
 The import can be initiated from [Developer Tools](https://my.home-assistant.io/redirect/developer_services/):
 ![Screenshot of Developer Tools](img/developer_tools.png)
 
-*Note:* Imported data may appear to be 1 hour off in the Energy Dashboard, e.g. the energy consumed between 09:00 and 10:00 appears in the "10:00-11:00" column in the dashboard. This is because HomeAssistant attributes the value for 10:00 to the 10:00-11:00 in the visual presentation, even though the energy was really used in the previous hour. The underlying data is stored correctly, it's just the visualization which is off.
+[!NOTE] Imported data may appear to be 1 hour off in the Energy Dashboard, e.g. the energy consumed between 09:00 and 10:00 appears in the "10:00-11:00" column in the dashboard. This is because HomeAssistant attributes the value for 10:00 to the 10:00-11:00 in the visual presentation, even though the energy was really used in the previous hour. The underlying data is stored correctly, it's just the visualization which is off.
