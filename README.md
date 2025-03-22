@@ -79,4 +79,5 @@ Data will be imported in 1-hour intervals. Import is available for data before t
 The import can be initiated from [Developer Tools](https://my.home-assistant.io/redirect/developer_services/):
 ![Screenshot of Developer Tools](img/developer_tools.png)
 
->[!NOTE] Imported data may appear to be 1 hour off in the Energy Dashboard, e.g. the energy consumed between 09:00 and 10:00 appears in the "10:00-11:00" column in the dashboard. This is because HomeAssistant attributes the value for 10:00 to the 10:00-11:00 in the visual presentation, even though the energy was really used in the previous hour. The underlying data is stored correctly, it's just the visualization which is off.
+> [!NOTE] 
+> Imported data may appear to be 1 hour off in the Energy Dashboard, e.g. the energy consumed between 09:00 and 10:00 appears in the "10:00-11:00" column in the dashboard. This is because HomeAssistant attributes the value for 10:00 to the 10:00-11:00 in the visual presentation, even though the energy was really used in the previous hour. The underlying data is stored correctly, it's just the visualization which is off.
