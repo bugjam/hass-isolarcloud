@@ -15,7 +15,7 @@ The integration will add one device to your HomeAssistant, representing your Sun
 
 ### Energy sensors (in Wh)
 * Battery charge energy
-* Battery dischange energy
+* Battery discharge energy
 * Consumed energy
 * Purchased energy
 * Feed-in energy
@@ -39,7 +39,7 @@ It's possible that other plant types offer different data points which may requi
 2. Create a new app
 3. Enable the "Authorize with OAuth2.0" setting and enter this Redirect URI: `https://bounce.e-dreams.dk/isolarcloud/` (See explanation below)
 4. Wait for Sungrow to approve your app
-5. When the app is approved, you can find the needed configuration details in the devloper portal
+5. When the app is approved, you can find the needed configuration details in the developer portal
 
 ## Installation
 
@@ -50,7 +50,7 @@ The integration can be installed with [HACS](https://hacs.xyz):
 3. Restart HomeAssistant
 4. Install *iSolarCloud* in HomeAssistant: Settings -> Integrations -> Add integration
 5. Select your iSolarCloud server
-6. The integrations uses HomeAssistant's [Application Credentials](https://www.home-assistant.io/integrations/application_credentials/) integration to manage the OAuth2 configuration. You will be prompted to enter *Client Id* and *Client Secret*
+6. The integration uses HomeAssistant's [Application Credentials](https://www.home-assistant.io/integrations/application_credentials/) integration to manage the OAuth2 configuration. You will be prompted to enter *Client Id* and *Client Secret*
    * *Client Id* must contain two values from the Sungrow developer portal: *ApplicationId* and *Appkey*, separated by a `@`. Example: `499@586FEE69FC005B17361AB992FC5B1CEA`
    * *Client Secret* is the *Secret Key*
 7. HomeAssistant will show a button to navigate to iSolarCloud

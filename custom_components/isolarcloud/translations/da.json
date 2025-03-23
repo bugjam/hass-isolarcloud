@@ -3,6 +3,13 @@
     "step": {
       "pick_implementation": {
         "title": "[%key:common::config_flow::title::oauth2_pick_implementation%]"
+      },
+      "user": {
+        "title": "Vælg server",
+        "description": "Vælg den server, du vil oprette forbindelse til",
+        "data": {
+          "server": "iSolarCloud server"
+        }
       }
     },
     "abort": {
@@ -19,13 +26,6 @@
     },
     "create_entry": {
       "default": "[%key:common::config_flow::create_entry::authenticated%]"
-    },
-    "user": {
-      "title": "Vælg server",
-      "description": "Vælg den server, du vil oprette forbindelse til",
-      "data": {
-        "server": "iSolarCloud server"
-      }
     }
   },
   "entity": {

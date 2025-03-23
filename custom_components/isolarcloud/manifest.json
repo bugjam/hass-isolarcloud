@@ -1,6 +1,9 @@
 {
   "domain": "isolarcloud",
   "name": "Sungrow iSolarCloud",
+  "after_dependencies": [
+    "recorder"
+  ],
   "codeowners": [
     "@bugjam"
   ],
