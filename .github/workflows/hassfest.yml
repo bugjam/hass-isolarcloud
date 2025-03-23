@@ -1,0 +1,18 @@
+name: Home Assistant Hassfest Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  hassfest:
+    name: Run hassfest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Run hassfest
+        uses: home-assistant/actions/hassfest@master
