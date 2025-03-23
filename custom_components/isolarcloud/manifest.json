@@ -12,14 +12,14 @@
     "application_credentials"
   ],
   "documentation": "https://github.com/bugjam/hass-isolarcloud/",
-  "issue_tracker": "https://github.com/bugjam/hass-isolarcloud/issues",
   "homekit": {},
   "iot_class": "cloud_polling",
-  "requirements": [
-    "pysolarcloud==0.2.1"
-  ],
+  "issue_tracker": "https://github.com/bugjam/hass-isolarcloud/issues",
   "loggers": [
     "pysolarcloud"
+  ],
+  "requirements": [
+    "pysolarcloud==0.2.1"
   ],
   "ssdp": [],
   "version": "0.4.2",
