@@ -18,6 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['state']) && !isset($_GE
     ]);
 
     // Redirect to the actual authorization endpoint
+    if(isset($_GET['cloudUrl'])){
+        $authServerUrl = $_GET['cloudUrl'];
+    }
     $authUrl = $authServerUrl . '?' . http_build_query([
         'cloudId' => $_GET['cloudId'],
         'applicationId' => $_GET['applicationId'],

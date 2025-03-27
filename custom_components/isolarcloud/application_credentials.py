@@ -56,6 +56,9 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
 
     async def async_generate_authorize_url(self, flow_id: str) -> str:
         """Generate a url for the user to authorize."""
+        # Not sure what url to use for China and International servers
+        # Please create an issue if you know the correct url
+        # https://github.com/bugjam/hass-isolarcloud/issues
         match self.server:
             case Server.China.value:
                 cloud_id = 1
@@ -63,14 +66,14 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
                 cloud_id = 2
             case Server.Europe.value:
                 cloud_id = 3
+                cloud_url = "https://web3.isolarcloud.eu/#/authorized-app"
             case Server.Australia.value:
-                cloud_id = 4
+                cloud_id = 7
+                cloud_url = "https://auweb3.isolarcloud.com/#/authorized-app"
             case _:
                 _LOGGER.error("Unknown server: %s", self.server)
                 raise ConfigEntryAuthFailed(f"Unknown server: {self.server}")
-        url = str(
-            URL(self.redirect_uri).with_query(
-                {
+        query = {
                     "state": _encode_jwt(
                         self.hass,
                         {"flow_id": flow_id, "redirect_uri": self.redirect_uri},
@@ -78,8 +81,9 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
                     "applicationId": self.app_id,
                     "cloudId": cloud_id,
                 }
-            )
-        )
+        if cloud_url is not None:
+            query["cloudUrl"] = cloud_url
+        url = str(URL(self.redirect_uri).with_query(query))
         _LOGGER.debug("Generated authorize url: %s", url)
         return url
 
