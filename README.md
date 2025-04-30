@@ -52,6 +52,7 @@ The integration can be installed with [HACS](https://hacs.xyz):
 5. Select your iSolarCloud server
 6. The integration uses HomeAssistant's [Application Credentials](https://www.home-assistant.io/integrations/application_credentials/) integration to manage the OAuth2 configuration. You will be prompted to enter *Client Id* and *Client Secret*
    * *Client Id* must contain two values from the Sungrow developer portal: *ApplicationId* and *Appkey*, separated by a `@`. Example: `499@586FEE69FC005B17361AB992FC5B1CEA`
+      NOTE: The *ApplicationID* can be found in the URL when viewing the details of your now-approved Sungrow App in the developer portal.
    * *Client Secret* is the *Secret Key*
 7. HomeAssistant will show a button to navigate to iSolarCloud
 8. Log in and select the plant you want to fetch data for
