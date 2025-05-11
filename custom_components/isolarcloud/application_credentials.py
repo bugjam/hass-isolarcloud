@@ -11,6 +11,7 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
     URL,
     AbstractOAuth2Implementation,
     _encode_jwt,
+    async_get_redirect_uri,
 )
 
 from .const import DOMAIN
@@ -52,13 +53,13 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
     @property
     def redirect_uri(self) -> str:
         """Return the redirect uri."""
-        return "https://bounce.e-dreams.dk/isolarcloud/"
+        return async_get_redirect_uri(self.hass)
 
     async def async_generate_authorize_url(self, flow_id: str) -> str:
         """Generate a url for the user to authorize."""
         # Not sure what url to use for China and International servers
-        # Please create an issue if you know the correct url
-        # https://github.com/bugjam/hass-isolarcloud/issues
+        # Please comment here if you know the correct url
+        # https://github.com/bugjam/hass-isolarcloud/issues/4
         match self.server:
             case Server.China.value:
                 cloud_id = 1
@@ -73,17 +74,19 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
             case _:
                 _LOGGER.error("Unknown server: %s", self.server)
                 raise ConfigEntryAuthFailed(f"Unknown server: {self.server}")
+        state = _encode_jwt(
+            self.hass,
+            {"flow_id": flow_id, "redirect_uri": self.redirect_uri},
+        )
         query = {
-                    "state": _encode_jwt(
-                        self.hass,
-                        {"flow_id": flow_id, "redirect_uri": self.redirect_uri},
-                    ),
-                    "applicationId": self.app_id,
-                    "cloudId": cloud_id,
-                }
-        if cloud_url is not None:
-            query["cloudUrl"] = cloud_url
-        url = str(URL(self.redirect_uri).with_query(query))
+            "applicationId": self.app_id,
+            "cloudId": cloud_id,
+            "redirectUrl": self.redirect_uri,
+        }
+        url = URL(cloud_url).with_query(query)
+        # Auth endpoint expects state first and other params after fragment
+        port = f":{url.port}" if url.explicit_port is not None else ""
+        url = f"{url.scheme}://{url.host}{port}?state={state}#{url.fragment}?{url.raw_query_string}"
         _LOGGER.debug("Generated authorize url: %s", url)
         return url
 

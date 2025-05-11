@@ -37,9 +37,11 @@ It's possible that other plant types offer different data points which may requi
 
 1. Create an account in the [Sungrow Developer Portal](https://developer-api.isolarcloud.com/)
 2. Create a new app
-3. Enable the "Authorize with OAuth2.0" setting and enter this Redirect URI: `https://bounce.e-dreams.dk/isolarcloud/` (See explanation below)
+3. Enable the "Authorize with OAuth2.0" setting and enter this Redirect URI: `https://my.home-assistant.io/redirect/oauth` [^1]
 4. Wait for Sungrow to approve your app
 5. When the app is approved, you can find the needed configuration details in the developer portal
+
+[^1]: If you have disabled My HomeAssistant, set the Redirect URI to `(your-home-assisant-address)/auth/external/callback`
 
 ## Installation
 
@@ -57,15 +59,9 @@ The integration can be installed with [HACS](https://hacs.xyz):
 8. Log in and select the plant you want to fetch data for
 9. You will be redirected back to [My Home Assistant](https://www.home-assistant.io/integrations/my/)
 
-## OAuth2 flow
+### Upgrade from previous versions
 
-The iSolarCloud API supports OAuth2 but unfortunately does not quite follow the standard: The server is expected to 
-return the `state` parameter to HomeAssistant when authorisation is completed but this parameter is missing.
-To overcome this, I have added a script on my own server which temporarily stores the `state` in a cookie
-and adds the missing parameter back to the request.
-The script can be found here: [https://github.com/bugjam/hass-isolarcloud/blob/main/bounce/index.php].
-
-(The script does not store your authorisation code. And even if I could get hold of it, I could not use it without knowing your appkey and secret key.)
+To upgrade from earlier versions of this integration (before v0.5.0), update the Redirct URI in Sungrow Developer Portal to `https://my.home-assistant.io/redirect/oauth`. Previous versions used an intermediate server (`bounce.e-dreams.dk`) in the authorisation flow but this is no longer needed. 
 
 ## Importing historical data
 
