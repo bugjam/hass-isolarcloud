@@ -25,7 +25,8 @@
       "user_rejected_authorize": "Authorization was rejected"
     },
     "create_entry": {
-      "default": "Successfully authenticated and connected to the service"
+      "default": "Successfully authenticated and connected to the service",
+      "reauth_successful": "Successfully reauthenticated and connected to the service"
     }
   },
   "entity": {

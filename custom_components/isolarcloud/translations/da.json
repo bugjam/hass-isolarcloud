@@ -25,7 +25,8 @@
       "user_rejected_authorize": "Godkendelsen blev afvist af brugeren"
     },
     "create_entry": {
-      "default": "Godkendelse gennemført, og tjenesten er forbundet"
+      "default": "Godkendelse gennemført, og tjenesten er forbundet",
+      "reauth_successful": "Godkendelse gennemført, forbindelsen til tjenesten er genoprettet"
     }
   },
   "entity": {
