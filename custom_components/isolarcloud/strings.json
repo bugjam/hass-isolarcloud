@@ -1,10 +1,12 @@
 {
   "config": {
-    "user": {
-      "title": "Select server",
-      "description": "Select the server you want to connect to",
-      "data": {
-        "server": "iSolarCloud server"
+    "step": {
+      "user": {
+        "title": "Select server",
+        "description": "Select the server you want to connect to",
+        "data": {
+          "server": "iSolarCloud server"
+        }
       }
     }
   }
