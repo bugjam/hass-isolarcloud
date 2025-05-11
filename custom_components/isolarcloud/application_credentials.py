@@ -64,6 +64,7 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
                 cloud_id = 1
             case Server.International.value:
                 cloud_id = 2
+                cloud_url = "https://web3.isolarcloud.com.hk/#/authorized-app"
             case Server.Europe.value:
                 cloud_id = 3
                 cloud_url = "https://web3.isolarcloud.eu/#/authorized-app"
