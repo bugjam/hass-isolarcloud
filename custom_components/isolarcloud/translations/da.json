@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "pick_implementation": {
-        "title": "[%key:common::config_flow::title::oauth2_pick_implementation%]"
+        "title": "Vælg godkendelsesmetode"
       },
       "user": {
         "title": "Vælg server",
@@ -13,19 +13,19 @@
       }
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_account%]",
-      "already_in_progress": "[%key:common::config_flow::abort::already_in_progress%]",
-      "oauth_error": "[%key:common::config_flow::abort::oauth2_error%]",
-      "oauth_failed": "[%key:common::config_flow::abort::oauth2_failed%]",
-      "oauth_timeout": "[%key:common::config_flow::abort::oauth2_timeout%]",
-      "oauth_unauthorized": "[%key:common::config_flow::abort::oauth2_unauthorized%]",
-      "missing_configuration": "[%key:common::config_flow::abort::oauth2_missing_configuration%]",
-      "authorize_url_timeout": "[%key:common::config_flow::abort::oauth2_authorize_url_timeout%]",
-      "no_url_available": "[%key:common::config_flow::abort::oauth2_no_url_available%]",
-      "user_rejected_authorize": "[%key:common::config_flow::abort::oauth2_user_rejected_authorize%]"
+      "already_configured": "Denne konto er allerede konfigureret",
+      "already_in_progress": "Konfiguration er allerede i gang",
+      "oauth_error": "Der opstod en ukendt OAuth2-fejl",
+      "oauth_failed": "Godkendelse med tjenesten mislykkedes",
+      "oauth_timeout": "Godkendelsen tog for lang tid og blev afbrudt",
+      "oauth_unauthorized": "Uautoriseret. Prøv igen.",
+      "missing_configuration": "OAuth2-konfiguration mangler",
+      "authorize_url_timeout": "Timeout ved hentning af godkendelses-URL",
+      "no_url_available": "Ingen godkendelses-URL tilgængelig",
+      "user_rejected_authorize": "Godkendelsen blev afvist af brugeren"
     },
     "create_entry": {
-      "default": "[%key:common::config_flow::create_entry::authenticated%]"
+      "default": "Godkendelse gennemført, og tjenesten er forbundet"
     }
   },
   "entity": {
