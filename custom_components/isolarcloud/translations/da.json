@@ -22,7 +22,8 @@
       "missing_configuration": "OAuth2-konfiguration mangler",
       "authorize_url_timeout": "Timeout ved hentning af godkendelses-URL",
       "no_url_available": "Ingen godkendelses-URL tilgængelig",
-      "user_rejected_authorize": "Godkendelsen blev afvist af brugeren"
+      "user_rejected_authorize": "Godkendelsen blev afvist af brugeren",
+      "invalid_client_id": "OAuth Client ID skal have formen applicationId@applicationKey"
     },
     "create_entry": {
       "default": "Godkendelse gennemført, og tjenesten er forbundet",

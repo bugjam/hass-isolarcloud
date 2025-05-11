@@ -6,6 +6,7 @@ from pysolarcloud import Server
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.selector import selector
 from homeassistant.util import Mapping
@@ -39,7 +40,10 @@ class OAuth2FlowHandler(
             )
         self.hass.data.setdefault(self.DOMAIN, {})
         self.hass.data[self.DOMAIN]["server"] = Server[user_input["server"]]
-        return await self.async_step_pick_implementation(None)
+        try:
+            return await self.async_step_pick_implementation(None)
+        except ConfigEntryAuthFailed as ex:
+            return self.async_abort(reason=ex.translation_key)
 
     async def async_oauth_create_entry(
         self, data: dict

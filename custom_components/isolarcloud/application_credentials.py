@@ -123,6 +123,16 @@ async def async_get_auth_implementation(hass: HomeAssistant, auth_domain, creden
         server = hass.data[DOMAIN]["server"]
     else:
         server = None
+    if "@" not in credential.client_id:
+        _LOGGER.error(
+            "Invalid client_id: %s, must be in the format <app_id>@<appkey>",
+            credential.client_id,
+        )
+        raise ConfigEntryAuthFailed(
+            "Client_id must be in the format <app_id>@<appkey>",
+            translation_domain=DOMAIN,
+            translation_key="invalid_client_id",
+        )
     _LOGGER.debug(
         "Creating OAuth2 implementation for %s, server=%s", auth_domain, server
     )

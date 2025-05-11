@@ -22,7 +22,8 @@
       "missing_configuration": "OAuth2 configuration is missing",
       "authorize_url_timeout": "Timed out while trying to get authorization URL",
       "no_url_available": "No authorization URL is available",
-      "user_rejected_authorize": "Authorization was rejected"
+      "user_rejected_authorize": "Authorization was rejected",
+      "invalid_client_id": "OAuth Client ID must be formatted as applicationId@applicationKey"
     },
     "create_entry": {
       "default": "Successfully authenticated and connected to the service",
