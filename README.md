@@ -4,11 +4,6 @@ This integration retrieves data from the [iSolarCloud API](https://developer-api
 
 Integration is based on the [pysolarcloud](https://github.com/bugjam/pysolarcloud) library.
 
-## Status
-This integration is quite new and might still have bugs. It runs on my HomeAssistant installation but it is not a "proven" product yet.
-
-The iSolarCloud API itself is also new and does not seem very mature. Their OAuth2 implementation required some workarounds as explained [below](#oauth2-flow).
-
 ## Sensors
 
 The integration will add one device to your HomeAssistant, representing your Sungrow plant. The following sensors are added to the device:
@@ -67,9 +62,6 @@ To upgrade from earlier versions of this integration (before v0.5.0), update the
 ## Importing historical data
 
 The integration can fetch energy data from iSolarCloud to make statistics available in HomeAssistant, e.g. from before the integration was installed or in case your HomeAssistant has been offline.
-
-> [!CAUTION]
-> Data import is still in an experimental state.
 
 Data will be imported in 1-hour intervals. Import is available for data before today's date.
 
