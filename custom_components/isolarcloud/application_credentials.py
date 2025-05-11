@@ -56,12 +56,10 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
 
     async def async_generate_authorize_url(self, flow_id: str) -> str:
         """Generate a url for the user to authorize."""
-        # Not sure what url to use for China and International servers
-        # Please create an issue if you know the correct url
-        # https://github.com/bugjam/hass-isolarcloud/issues
         match self.server:
             case Server.China.value:
                 cloud_id = 1
+                cloud_url = "https://web3.isolarcloud.com.cn/#/authorized-app"
             case Server.International.value:
                 cloud_id = 2
                 cloud_url = "https://web3.isolarcloud.com.hk/#/authorized-app"
