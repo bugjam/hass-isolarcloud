@@ -123,13 +123,13 @@ async def async_get_auth_implementation(hass: HomeAssistant, auth_domain, creden
         server = hass.data[DOMAIN]["server"]
     else:
         server = None
-    if "@" not in credential.client_id:
+    if "@" not in credential.client_id or " " in credential.client_id:
         _LOGGER.error(
-            "Invalid client_id: %s, must be in the format <app_id>@<appkey>",
+            "Invalid client_id: %s, must be in the format <app_id>@<appkey> and must not contain spaces",
             credential.client_id,
         )
         raise ConfigEntryAuthFailed(
-            "Client_id must be in the format <app_id>@<appkey>",
+            "Client_id must be in the format <app_id>@<appkey> and must not contain spaces",
             translation_domain=DOMAIN,
             translation_key="invalid_client_id",
         )
