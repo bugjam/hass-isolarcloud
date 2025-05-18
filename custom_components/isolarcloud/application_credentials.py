@@ -139,7 +139,7 @@ async def async_get_auth_implementation(hass: HomeAssistant, auth_domain, creden
     return OAuth2Impl(
         hass,
         auth_domain,
-        credential.client_id,
-        credential.client_secret,
+        credential.client_id.replace(" ", ""),
+        credential.client_secret.strip(),
         server,
     )
