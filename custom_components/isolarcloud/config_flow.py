@@ -6,12 +6,48 @@ from pysolarcloud import Server
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.core import callback
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.selector import selector
 from homeassistant.util import Mapping
 
 from .const import DOMAIN
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    """Options flow for setting update interval."""
+
+    OPTIONS_SCHEMA = vol.Schema(
+        {
+            vol.Required("update_interval", default=300): selector(
+                {
+                    "number": {
+                        "min": 1,
+                        "max": 3600,
+                        "mode": "box",
+                        "unit_of_measurement": "seconds",
+                    }
+                }
+            )
+        }
+    )
+
+    def __init__(self) -> None:
+        """Initialize the options flow."""
+        self._update_interval = 300  # Default update interval in seconds
+
+    async def async_step_init(self, user_input=None) -> config_entries.ConfigFlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                self.OPTIONS_SCHEMA, self.config_entry.options
+            ),
+        )
 
 
 class OAuth2FlowHandler(
@@ -75,3 +111,11 @@ class OAuth2FlowHandler(
         self.hass.data[self.DOMAIN]["server"] = Server(entry_data["server"])
         self.logger.warning("Re-authenticating with server=%s", entry_data["server"])
         return await self.async_step_pick_implementation(None)
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> OptionsFlowHandler:
+        """Create the options flow."""
+        return OptionsFlowHandler()

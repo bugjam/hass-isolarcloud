@@ -214,8 +214,17 @@ class BatterySensor(CoordinatorEntity, SensorEntity):
 class Coordinator(DataUpdateCoordinator):
     """Update Coordinator."""
 
-    def __init__(self, hass: HomeAssistant, config_entry) -> None:
+    def __init__(self, hass: HomeAssistant, config_entry: ConfigType) -> None:
         """Initialize my coordinator."""
+        if config_entry.options and "update_interval" in config_entry.options:
+            update_interval = timedelta(
+                seconds=float(config_entry.options["update_interval"])
+            )
+            _LOGGER.info(
+                "Update interval configured to %s seconds", update_interval.seconds
+            )
+        else:
+            update_interval = timedelta(minutes=5)
         super().__init__(
             hass,
             _LOGGER,
@@ -223,7 +232,7 @@ class Coordinator(DataUpdateCoordinator):
             name="isolarcloud",
             config_entry=config_entry,
             # Polling interval. Will only be polled if there are subscribers.
-            update_interval=timedelta(minutes=5),
+            update_interval=update_interval,
             always_update=False,
         )
         self.plant_id = config_entry.data["plant"]

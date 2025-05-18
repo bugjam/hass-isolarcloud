@@ -30,6 +30,17 @@
       "reauth_successful": "Godkendelse gennemført, forbindelsen til tjenesten er genoprettet"
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Vælg opdateringsinterval",
+        "description": "Data i iSolarCloud opdaters cirka hver 5. minut. Det anbefales at opdateringsintervallet ikke er mindre end 300 sekunder.",
+        "data": {
+          "update_interval": "Opdateringsinterval (sekunder)"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "feed_in_energy_total": {

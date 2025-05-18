@@ -59,6 +59,12 @@ The integration can be installed with [HACS](https://hacs.xyz):
 
 To upgrade from earlier versions of this integration (before v0.5.0), update the Redirct URI in Sungrow Developer Portal to `https://my.home-assistant.io/redirect/oauth`. Previous versions used an intermediate server (`bounce.e-dreams.dk`) in the authorisation flow but this is no longer needed. 
 
+### Update interval
+
+After setting up the integration, you can change the update interval under Settings -> Devices & Services -> Integrations -> Sungrow iSolarcloud -> CONFIGURE.
+
+According to Sungrow, the data refreshes about every 5 minutes. They recommend that the interval should not be shorter than 5 minutes (300 seconds).
+
 ## Importing historical data
 
 The integration can fetch energy data from iSolarCloud to make statistics available in HomeAssistant, e.g. from before the integration was installed or in case your HomeAssistant has been offline.

@@ -30,6 +30,17 @@
       "reauth_successful": "Successfully reauthenticated and connected to the service"
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure update interval",
+        "description": "The data in iSolarCloud refreshes about every 5 minutes. It is recommended that the endpoint call frequency is no less than 300 seconds.",
+        "data": {
+          "update_interval": "Update interval (seconds)"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "feed_in_energy_total": {
