@@ -16,7 +16,7 @@ from homeassistant.components.recorder.statistics import (
     statistics_during_period,
 )
 from homeassistant.components.sensor import HomeAssistantError
-from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.helpers import config_validation as cv
 from homeassistant.util.dt import as_local, as_utc, now, start_of_local_day
 
@@ -253,4 +253,56 @@ async def async_register_services(
                 vol.Optional("delete", default=False): cv.boolean,
             }
         ),
+    )
+
+    async def list_data_points(call: ServiceCall):
+        """List available data points for the plant."""
+        if call.data.get("measure_points"):
+            mp = call.data["measure_points"]
+        else:
+            mp = None
+        try:
+            data_points = await coordinator.plants_api.async_get_realtime_data(
+                coordinator.plant_id, measure_points=mp
+            )
+            if coordinator.plant_id in data_points:
+                _LOGGER.debug(
+                    "Data points for plant %s: %s", coordinator.plant_id, data_points
+                )
+                return {
+                    "data_points": [
+                        {
+                            "code": dp["code"],
+                            "value": dp["value"],
+                            "unit": dp["unit"],
+                        }
+                        for dp in data_points[coordinator.plant_id].values()
+                        if dp["value"] is not None
+                    ],
+                }
+            else:
+                _LOGGER.error(
+                    "Plant ID %s not found in data points: %s",
+                    coordinator.plant_id,
+                    data_points,
+                )
+                return {
+                    "data_points": [],
+                }
+        except Exception as err:
+            _LOGGER.error("Error retrieving data points: %s", err)
+            raise HomeAssistantError from err
+
+    hass.services.async_register(
+        DOMAIN,
+        "list_data_points",
+        list_data_points,
+        schema=vol.Schema(
+            {
+                vol.Optional("measure_points", default=[]): vol.All(
+                    cv.ensure_list, [cv.string]
+                ),
+            }
+        ),
+        supports_response=SupportsResponse.ONLY,
     )

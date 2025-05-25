@@ -12,5 +12,15 @@
           "description": "Slut for den periode, hvor data skal importeres."
         }
       }
+    },
+    "list_data_points": {
+      "name": "Vis datapunkter",
+      "description": "Vis hvilke data der er tilgængelige fra iSolarCLoud",
+      "fields": {
+        "measure_points": {
+          "name": "measure_points",
+          "description": "Ønskede datapunkter"
+        }
+      }
     }
-  }
+}

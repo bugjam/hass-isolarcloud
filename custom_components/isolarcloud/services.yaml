@@ -20,3 +20,14 @@ import_historical_data:
       required: false
       selector:
         boolean:
+list_data_points:
+  name: List data points
+  description: "List all available data points from iSolarCloud."
+  fields:
+    measure_points:
+      name: Measure points
+      description: List of measure point codes to query (optional).
+      required: false
+      selector:
+        text:
+          multiple: true
