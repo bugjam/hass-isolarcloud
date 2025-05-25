@@ -133,14 +133,22 @@ class EnergySensor(CoordinatorEntity, SensorEntity):
         self._attr_unique_id = f"{coordinator.plant_id}_{id}"
         self._attr_translation_key = id
         self._attr_has_entity_name = True
-        if self.coordinator.data and self.id in self.coordinator.data:
+        if (
+            self.coordinator.data
+            and self.id in self.coordinator.data
+            and self.coordinator.data[self.id].get("value") is not None
+        ):
             self._attr_native_value = self.coordinator.data[self.id]["value"]
             self._attr_available = True
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        if self.coordinator.data and self.id in self.coordinator.data:
+        if (
+            self.coordinator.data
+            and self.id in self.coordinator.data
+            and self.coordinator.data[self.id].get("value") is not None
+        ):
             self._attr_native_value = self.coordinator.data[self.id]["value"]
             self._attr_available = True
         else:
@@ -164,14 +172,22 @@ class PowerSensor(CoordinatorEntity, SensorEntity):
         self._attr_unique_id = f"{coordinator.plant_id}_{id}"
         self._attr_translation_key = id
         self._attr_has_entity_name = True
-        if self.coordinator.data and self.id in self.coordinator.data:
+        if (
+            self.coordinator.data
+            and self.id in self.coordinator.data
+            and self.coordinator.data[self.id].get("value") is not None
+        ):
             self._attr_native_value = self.coordinator.data[self.id]["value"]
             self._attr_available = True
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        if self.coordinator.data and self.id in self.coordinator.data:
+        if (
+            self.coordinator.data
+            and self.id in self.coordinator.data
+            and self.coordinator.data[self.id].get("value") is not None
+        ):
             self._attr_native_value = self.coordinator.data[self.id]["value"]
             self._attr_available = True
         else:
@@ -195,14 +211,22 @@ class BatterySensor(CoordinatorEntity, SensorEntity):
         self._attr_unique_id = f"{coordinator.plant_id}_{id}"
         self._attr_translation_key = id
         self._attr_has_entity_name = True
-        if self.coordinator.data and self.id in self.coordinator.data:
+        if (
+            self.coordinator.data
+            and self.id in self.coordinator.data
+            and self.coordinator.data[self.id].get("value") is not None
+        ):
             self._attr_native_value = self.coordinator.data[self.id]["value"] * 100.0
             self._attr_available = True
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        if self.coordinator.data and self.id in self.coordinator.data:
+        if (
+            self.coordinator.data
+            and self.id in self.coordinator.data
+            and self.coordinator.data[self.id].get("value") is not None
+        ):
             self._attr_native_value = self.coordinator.data[self.id]["value"] * 100.0
             self._attr_available = True
         else:
