@@ -111,21 +111,28 @@ async def async_setup_entry(
         ),
     )
     async_add_entities(
-        [EnergySensor(coordinator, device, s) for s in ENERGY_SENSORS]
-        + [PowerSensor(coordinator, device, s) for s in POWER_SENSORS]
-        + [BatterySensor(coordinator, device, s) for s in BATTERY_SENSORS],
+        [
+            ISolarCloudSensor(coordinator, device, s, SensorDeviceClass.ENERGY)
+            for s in ENERGY_SENSORS
+        ]
+        + [
+            ISolarCloudSensor(coordinator, device, s, SensorDeviceClass.POWER)
+            for s in POWER_SENSORS
+        ]
+        + [
+            ISolarCloudSensor(coordinator, device, s, SensorDeviceClass.BATTERY)
+            for s in BATTERY_SENSORS
+        ],
     )
     return True
 
 
-class EnergySensor(CoordinatorEntity, SensorEntity):
-    """Representation of an Energy Sensor."""
+class ISolarCloudSensor(CoordinatorEntity, SensorEntity):
+    """Generic Sensor for iSolarCloud."""
 
-    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
-    _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.TOTAL
-
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo, id: str) -> None:
+    def __init__(
+        self, coordinator: Coordinator, device: DeviceInfo, id: str, sensor_type: str
+    ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self.id = id
@@ -133,51 +140,31 @@ class EnergySensor(CoordinatorEntity, SensorEntity):
         self._attr_unique_id = f"{coordinator.plant_id}_{id}"
         self._attr_translation_key = id
         self._attr_has_entity_name = True
-        if (
-            self.coordinator.data
-            and self.id in self.coordinator.data
-            and self.coordinator.data[self.id].get("value") is not None
-        ):
-            self._attr_native_value = self.coordinator.data[self.id]["value"]
-            self._attr_available = True
+        self._attr_device_class = sensor_type
+        self._attr_native_unit_of_measurement = unit_of(id)
 
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        if (
-            self.coordinator.data
-            and self.id in self.coordinator.data
-            and self.coordinator.data[self.id].get("value") is not None
-        ):
-            self._attr_native_value = self.coordinator.data[self.id]["value"]
-            self._attr_available = True
+        # Set attributes based on sensor type
+        if sensor_type == SensorDeviceClass.ENERGY:
+            self._attr_state_class = SensorStateClass.TOTAL
+            self._value_transform = lambda v: v
+        elif sensor_type == SensorDeviceClass.POWER:
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+            self._value_transform = lambda v: v
+        elif sensor_type == SensorDeviceClass.BATTERY:
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+            self._value_transform = lambda v: v * 100.0
         else:
-            self._attr_native_value = None
-            self._attr_available = False
-        self.async_write_ha_state()
+            self._value_transform = lambda v: v
 
-
-class PowerSensor(CoordinatorEntity, SensorEntity):
-    """Representation of a Power Sensor."""
-
-    _attr_native_unit_of_measurement = UnitOfPower.WATT
-    _attr_device_class = SensorDeviceClass.POWER
-    _attr_state_class = SensorStateClass.MEASUREMENT
-
-    def __init__(self, coordinator, device, id: str) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self.id = id
-        self._attr_device_info = device
-        self._attr_unique_id = f"{coordinator.plant_id}_{id}"
-        self._attr_translation_key = id
-        self._attr_has_entity_name = True
+        # Get initial sensor value from coordinator
         if (
             self.coordinator.data
             and self.id in self.coordinator.data
             and self.coordinator.data[self.id].get("value") is not None
         ):
-            self._attr_native_value = self.coordinator.data[self.id]["value"]
+            self._attr_native_value = self._value_transform(
+                self.coordinator.data[self.id]["value"]
+            )
             self._attr_available = True
 
     @callback
@@ -188,46 +175,9 @@ class PowerSensor(CoordinatorEntity, SensorEntity):
             and self.id in self.coordinator.data
             and self.coordinator.data[self.id].get("value") is not None
         ):
-            self._attr_native_value = self.coordinator.data[self.id]["value"]
-            self._attr_available = True
-        else:
-            self._attr_native_value = None
-            self._attr_available = False
-        self.async_write_ha_state()
-
-
-class BatterySensor(CoordinatorEntity, SensorEntity):
-    """Representation of a Battery Sensor."""
-
-    _attr_native_unit_of_measurement = PERCENTAGE
-    _attr_device_class = SensorDeviceClass.BATTERY
-    _attr_state_class = SensorStateClass.MEASUREMENT
-
-    def __init__(self, coordinator, device, id: str) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self.id = id
-        self._attr_device_info = device
-        self._attr_unique_id = f"{coordinator.plant_id}_{id}"
-        self._attr_translation_key = id
-        self._attr_has_entity_name = True
-        if (
-            self.coordinator.data
-            and self.id in self.coordinator.data
-            and self.coordinator.data[self.id].get("value") is not None
-        ):
-            self._attr_native_value = self.coordinator.data[self.id]["value"] * 100.0
-            self._attr_available = True
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        if (
-            self.coordinator.data
-            and self.id in self.coordinator.data
-            and self.coordinator.data[self.id].get("value") is not None
-        ):
-            self._attr_native_value = self.coordinator.data[self.id]["value"] * 100.0
+            self._attr_native_value = self._value_transform(
+                self.coordinator.data[self.id]["value"]
+            )
             self._attr_available = True
         else:
             self._attr_native_value = None
