@@ -3,6 +3,7 @@
 import logging
 
 from pysolarcloud import Server
+from pysolarcloud.plants import Plants
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -63,6 +64,26 @@ class OAuth2FlowHandler(
         )
     }
 
+    def _plant_schema(self, plants: list[dict]) -> vol.Schema:
+        """Return a schema for selecting a plant."""
+        return vol.Schema(
+            {
+                vol.Required("plant"): selector(
+                    {
+                        "select": {
+                            "options": [
+                                {
+                                    "label": plant["ps_name"],
+                                    "value": str(plant["ps_id"]),
+                                }
+                                for plant in plants
+                            ]
+                        }
+                    }
+                )
+            }
+        )
+
     @property
     def logger(self) -> logging.Logger:
         """Return logger."""
@@ -84,8 +105,30 @@ class OAuth2FlowHandler(
     async def async_oauth_create_entry(
         self, data: dict
     ) -> config_entries.ConfigFlowResult:
-        """Create an entry for the flow."""
-        plant = data["token"]["result_data"]["auth_ps_list"][0]
+        """Handle OAuth completion."""
+        plants = data["token"]["result_data"]["auth_ps_list"]
+        if getattr(self, "_reauth_plant_id", None) is not None:
+            plant = self._reauth_plant_id
+        elif len(plants) == 1:
+            plant = plants[0]
+        else:
+            self._oauth_data = data
+            return await self.async_step_select_plant()
+        return await self._async_create_entry(data, plant)
+
+    async def async_step_select_plant(self, user_input=None):
+        """Step to select a plant."""
+        if user_input is not None:
+            return await self._async_create_entry(self._oauth_data, user_input["plant"])
+        api = Plants(self.flow_impl)
+        plants = await api.async_get_plants()
+        self.logger.debug("Plants: %s", plants)
+        return self.async_show_form(
+            step_id="select_plant",
+            data_schema=self._plant_schema(plants),
+        )
+
+    async def _async_create_entry(self, data, plant):
         d = {
             **data,
             "plant": plant,
@@ -95,6 +138,13 @@ class OAuth2FlowHandler(
         }
         await self.async_set_unique_id(str(plant))
         if self.source == config_entries.SOURCE_REAUTH:
+            if plant not in data["token"]["result_data"]["auth_ps_list"]:
+                self.logger.error(
+                    "Plant ID %s not found in reauth data: %s",
+                    plant,
+                    data["token"]["result_data"]["auth_ps_list"],
+                )
+                raise ConfigEntryAuthFailed(translation_key="plant_id_mismatch")
             self._abort_if_unique_id_mismatch(reason="plant_id_mismatch")
             self.logger.info(
                 "async_oauth_create_entry callled with sourece=REAUTH and data=%s", d
@@ -109,6 +159,7 @@ class OAuth2FlowHandler(
         """Perform reauthentication upon an API authentication error."""
         self.hass.data.setdefault(self.DOMAIN, {})
         self.hass.data[self.DOMAIN]["server"] = Server(entry_data["server"])
+        self._reauth_plant_id = entry_data["plant"]
         self.logger.warning("Re-authenticating with server=%s", entry_data["server"])
         return await self.async_step_pick_implementation(None)
 

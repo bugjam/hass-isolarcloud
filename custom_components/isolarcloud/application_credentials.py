@@ -39,6 +39,7 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
         websession = aiohttp_client.async_get_clientsession(hass)
         self.app_id, appkey = client_id.split("@")
         super().__init__(websession, server, appkey, client_secret, self.app_id)
+        self.access_token = None
 
     @property
     def name(self) -> str:
@@ -95,6 +96,7 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
         if "error" in result:
             _LOGGER.error("Error fetching tokens: %s", result)
             raise ConfigEntryAuthFailed("Failed to fetch tokens")
+        self.access_token = result.get("access_token")
         return result
 
     async def _async_refresh_token(self, token: dict) -> dict:
@@ -107,11 +109,8 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
         return result
 
     async def async_get_access_token(self) -> str:
-        """Return a valid access token.
-
-        N/A in this class as it is only used for setting up the OAuth2 flow.
-        """
-        return None
+        """Return a valid access token."""
+        return self.access_token
 
 
 async def async_get_auth_implementation(hass: HomeAssistant, auth_domain, credential):

@@ -5,10 +5,17 @@
         "title": "Choose authentication provider"
       },
       "user": {
-        "title": "Select server",
+        "title": "Select iSolarCloud server",
         "description": "Select the server you want to connect to",
         "data": {
           "server": "iSolarCloud server"
+        }
+      },
+      "select_plant": {
+        "title": "Select Plant",
+        "description": "Select the plant you want to configure.",
+        "data": {
+          "plant": "Plant"
         }
       }
     },
@@ -28,6 +35,9 @@
     "create_entry": {
       "default": "Successfully authenticated and connected to the service",
       "reauth_successful": "Successfully reauthenticated and connected to the service"
+    },
+    "error": {
+      "plant_id_mismatch": "No access to the configured plant."
     }
   },
   "options": {

@@ -10,6 +10,13 @@
         "data": {
           "server": "iSolarCloud server"
         }
+      },
+      "select_plant": {
+        "title": "Vælg anlæg",
+        "description": "Vælg det anlæg, du vil konfigurere.",
+        "data": {
+          "plant": "Anlæg"
+        }
       }
     },
     "abort": {
@@ -28,6 +35,9 @@
     "create_entry": {
       "default": "Godkendelse gennemført, og tjenesten er forbundet",
       "reauth_successful": "Godkendelse gennemført, forbindelsen til tjenesten er genoprettet"
+    },
+    "error": {
+      "plant_id_mismatch": "Ingen adgang til det valgte anlæg."
     }
   },
   "options": {
