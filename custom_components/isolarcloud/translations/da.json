@@ -11,9 +11,9 @@
           "server": "iSolarCloud server"
         }
       },
-      "select_plant": {
+      "select_plants": {
         "title": "Vælg anlæg",
-        "description": "Vælg det anlæg, du vil konfigurere.",
+        "description": "Vælg de anlæg, du vil konfigurere.",
         "data": {
           "plant": "Anlæg"
         }

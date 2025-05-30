@@ -22,6 +22,6 @@
     "pysolarcloud==0.2.1"
   ],
   "ssdp": [],
-  "version": "0.8.0",
+  "version": "0.8.0-beta",
   "zeroconf": []
 }

@@ -11,11 +11,11 @@
           "server": "iSolarCloud server"
         }
       },
-      "select_plant": {
-        "title": "Select Plant",
-        "description": "Select the plant you want to configure.",
+      "select_plants": {
+        "title": "Select Plants",
+        "description": "Select the plants you want to connect.",
         "data": {
-          "plant": "Plant"
+          "plants": "Plants"
         }
       }
     },
@@ -35,9 +35,6 @@
     "create_entry": {
       "default": "Successfully authenticated and connected to the service",
       "reauth_successful": "Successfully reauthenticated and connected to the service"
-    },
-    "error": {
-      "plant_id_mismatch": "No access to the configured plant."
     }
   },
   "options": {

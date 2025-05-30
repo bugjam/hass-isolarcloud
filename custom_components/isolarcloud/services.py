@@ -163,7 +163,9 @@ async def get_baselines(
     return baselines
 
 
-async def async_delete_statistics_range(hass, statistic_id, start_time, end_time):
+async def async_delete_statistics_range(
+    hass: HomeAssistant, statistic_id, start_time, end_time
+):
     """Delete existing statistics rows for a statistic_id in a given time range."""
     # Add job to the executor to avoid blocking the event loop
     await get_instance(hass).async_add_executor_job(
@@ -214,7 +216,7 @@ def _delete_statistics_range_blocking(
 
 
 async def async_register_services(
-    hass: HomeAssistant, coordinator, import_sensors: list[str]
+    hass: HomeAssistant, coordinator, plants, import_sensors: list[str]
 ):
     """Register Home Assistant services for the iSolarCloud integration."""
 
@@ -230,7 +232,7 @@ async def async_register_services(
         imported_count = await async_import_historical_data(
             hass,
             coordinator.plants_api,
-            coordinator.plant_id,
+            call.data.get("plant", coordinator.plant_ids[0]),
             coordinator.get_entity_id,
             import_sensors,
             start,
@@ -251,6 +253,7 @@ async def async_register_services(
                 vol.Required("start"): cv.datetime,
                 vol.Required("end"): cv.datetime,
                 vol.Optional("delete", default=False): cv.boolean,
+                vol.Optional("plant"): vol.In(plants),
             }
         ),
     )
@@ -261,14 +264,13 @@ async def async_register_services(
             mp = call.data["measure_points"]
         else:
             mp = None
+        plant = call.data.get("plant", coordinator.plant_ids[0])
         try:
             data_points = await coordinator.plants_api.async_get_realtime_data(
-                coordinator.plant_id, measure_points=mp
+                plant, measure_points=mp
             )
-            if coordinator.plant_id in data_points:
-                _LOGGER.debug(
-                    "Data points for plant %s: %s", coordinator.plant_id, data_points
-                )
+            if plant in data_points:
+                _LOGGER.debug("Data points for plant %s: %s", plant, data_points)
                 return {
                     "data_points": [
                         {
@@ -276,14 +278,14 @@ async def async_register_services(
                             "value": dp["value"],
                             "unit": dp["unit"],
                         }
-                        for dp in data_points[coordinator.plant_id].values()
+                        for dp in data_points[plant].values()
                         if dp["value"] is not None
                     ],
                 }
             else:
                 _LOGGER.error(
                     "Plant ID %s not found in data points: %s",
-                    coordinator.plant_id,
+                    plant,
                     data_points,
                 )
                 return {
@@ -301,6 +303,9 @@ async def async_register_services(
             {
                 vol.Optional("measure_points", default=[]): vol.All(
                     cv.ensure_list, [cv.string]
+                ),
+                vol.Optional("plant", default=coordinator.plant_ids[0]): vol.In(
+                    coordinator.plant_ids
                 ),
             }
         ),

@@ -65,10 +65,12 @@ class OAuth2FlowHandler(
     }
 
     def _plant_schema(self, plants: list[dict]) -> vol.Schema:
-        """Return a schema for selecting a plant."""
+        """Return a schema for selecting multiple plants."""
         return vol.Schema(
             {
-                vol.Required("plant"): selector(
+                vol.Required(
+                    "plants", default=[str(plant["ps_id"]) for plant in plants]
+                ): selector(
                     {
                         "select": {
                             "options": [
@@ -77,7 +79,8 @@ class OAuth2FlowHandler(
                                     "value": str(plant["ps_id"]),
                                 }
                                 for plant in plants
-                            ]
+                            ],
+                            "multiple": True,
                         }
                     }
                 )
@@ -107,50 +110,41 @@ class OAuth2FlowHandler(
     ) -> config_entries.ConfigFlowResult:
         """Handle OAuth completion."""
         plants = data["token"]["result_data"]["auth_ps_list"]
-        if getattr(self, "_reauth_plant_id", None) is not None:
-            plant = self._reauth_plant_id
-        elif len(plants) == 1:
-            plant = plants[0]
-        else:
+        if len(plants) > 1 and self.source != config_entries.SOURCE_REAUTH:
             self._oauth_data = data
-            return await self.async_step_select_plant()
-        return await self._async_create_entry(data, plant)
+            return await self.async_step_select_plants()
+        return await self._async_create_entry(data, plants)
 
-    async def async_step_select_plant(self, user_input=None):
-        """Step to select a plant."""
+    async def async_step_select_plants(self, user_input=None):
+        """Step to select plants."""
         if user_input is not None:
-            return await self._async_create_entry(self._oauth_data, user_input["plant"])
+            return await self._async_create_entry(
+                self._oauth_data, user_input["plants"]
+            )
         api = Plants(self.flow_impl)
         plants = await api.async_get_plants()
         self.logger.debug("Plants: %s", plants)
         return self.async_show_form(
-            step_id="select_plant",
+            step_id="select_plants",
             data_schema=self._plant_schema(plants),
         )
 
-    async def _async_create_entry(self, data, plant):
+    async def _async_create_entry(self, data, plants):
         d = {
             **data,
-            "plant": plant,
+            "plant": plants[0],
+            "plants": plants,
             "server": self.hass.data[self.DOMAIN]["server"].value,
             "client_id": self.flow_impl.client_id,
             "client_secret": self.flow_impl.client_secret,
         }
-        await self.async_set_unique_id(str(plant))
+        await self.async_set_unique_id(plants[0])
         if self.source == config_entries.SOURCE_REAUTH:
-            if plant not in data["token"]["result_data"]["auth_ps_list"]:
-                self.logger.error(
-                    "Plant ID %s not found in reauth data: %s",
-                    plant,
-                    data["token"]["result_data"]["auth_ps_list"],
-                )
-                raise ConfigEntryAuthFailed(translation_key="plant_id_mismatch")
-            self._abort_if_unique_id_mismatch(reason="plant_id_mismatch")
             self.logger.info(
-                "async_oauth_create_entry callled with sourece=REAUTH and data=%s", d
+                "async_oauth_create_entry called with source=REAUTH and data=%s", d
             )
             return self.async_update_reload_and_abort(self._get_reauth_entry(), data=d)
-        self.logger.info("async_oauth_create_entry callled with data=%s", d)
+        self.logger.info("async_oauth_create_entry called with data=%s", d)
         return self.async_create_entry(title=self.flow_impl.name, data=d)
 
     async def async_step_reauth(
@@ -159,7 +153,6 @@ class OAuth2FlowHandler(
         """Perform reauthentication upon an API authentication error."""
         self.hass.data.setdefault(self.DOMAIN, {})
         self.hass.data[self.DOMAIN]["server"] = Server(entry_data["server"])
-        self._reauth_plant_id = entry_data["plant"]
         self.logger.warning("Re-authenticating with server=%s", entry_data["server"])
         return await self.async_step_pick_implementation(None)
 

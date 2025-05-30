@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
@@ -12,6 +14,7 @@ from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow
 from . import api
 from .const import DOMAIN
 
+_LOGGER = logging.getLogger(__name__)
 _PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 CONFIG_SCHEMA = vol.Schema(
@@ -22,6 +25,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required("client_id"): str,
                 vol.Required("client_secret"): str,
                 vol.Required("plant"): str,
+                vol.Optional("plants"): vol.All(vol.Coerce(list), vol.Length(min=1)),
                 vol.Optional("token"): dict,
             }
         )
@@ -63,6 +67,28 @@ async def async_unload_entry(
 ) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, _PLATFORMS)
+
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Migrate old entry."""
+    _LOGGER.debug(
+        "Migrating configuration from version %s.%s",
+        config_entry.version,
+        config_entry.minor_version,
+    )
+
+    if config_entry.version > 1:
+        return False
+
+    if config_entry.minor_version < 2:
+        new_data = {**config_entry.data}
+        new_data["plants"] = [config_entry.data["plant"]]
+
+        hass.config_entries.async_update_entry(
+            config_entry, data=new_data, minor_version=2, version=1
+        )
+
+    return True
 
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
