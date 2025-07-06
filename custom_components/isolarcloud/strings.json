@@ -7,6 +7,13 @@
         "data": {
           "server": "iSolarCloud server"
         }
+      },
+      "plant": {
+        "title": "Select Plant",
+        "description": "Select the plant you want to configure.",
+        "data": {
+          "plant": "Plant"
+        }
       }
     }
   }

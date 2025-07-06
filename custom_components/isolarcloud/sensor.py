@@ -64,30 +64,40 @@ async def async_setup_entry(
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Set up the sensor platform."""
-    coordinator = Coordinator(hass, config)
+    plants = config.data.get("plants", [config.data["plant"]])
+    coordinator = Coordinator(hass, config, plants)
     await coordinator.async_config_entry_first_refresh()
-    device = DeviceInfo(
-        identifiers={(DOMAIN, config.data["plant"])},
-        name=coordinator.plant_name,
-    )
 
     # Register services from services.py
-    await async_register_services(hass, coordinator, import_sensors=ENERGY_SENSORS)
-
-    async_add_entities(
-        [
-            ISolarCloudSensor(coordinator, device, s, SensorDeviceClass.ENERGY)
-            for s in ENERGY_SENSORS
-        ]
-        + [
-            ISolarCloudSensor(coordinator, device, s, SensorDeviceClass.POWER)
-            for s in POWER_SENSORS
-        ]
-        + [
-            ISolarCloudSensor(coordinator, device, s, SensorDeviceClass.BATTERY)
-            for s in BATTERY_SENSORS
-        ],
+    await async_register_services(
+        hass, coordinator, plants, import_sensors=ENERGY_SENSORS
     )
+
+    for plant in plants:
+        device = DeviceInfo(
+            identifiers={(DOMAIN, plant)},
+            name=coordinator.plant_name(plant),
+        )
+        async_add_entities(
+            [
+                ISolarCloudSensor(
+                    coordinator, device, plant, s, SensorDeviceClass.ENERGY
+                )
+                for s in ENERGY_SENSORS
+            ]
+            + [
+                ISolarCloudSensor(
+                    coordinator, device, plant, s, SensorDeviceClass.POWER
+                )
+                for s in POWER_SENSORS
+            ]
+            + [
+                ISolarCloudSensor(
+                    coordinator, device, plant, s, SensorDeviceClass.BATTERY
+                )
+                for s in BATTERY_SENSORS
+            ],
+        )
     return True
 
 
@@ -95,13 +105,19 @@ class ISolarCloudSensor(CoordinatorEntity, SensorEntity):
     """Generic Sensor for iSolarCloud."""
 
     def __init__(
-        self, coordinator: Coordinator, device: DeviceInfo, id: str, sensor_type: str
+        self,
+        coordinator: Coordinator,
+        device: DeviceInfo,
+        plant_id: str,
+        id: str,
+        sensor_type: str,
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self.id = id
+        self.plant_id = plant_id
         self._attr_device_info = device
-        self._attr_unique_id = f"{coordinator.plant_id}_{id}"
+        self._attr_unique_id = f"{plant_id}_{id}"
         self._attr_translation_key = id
         self._attr_has_entity_name = True
         self._attr_device_class = sensor_type
@@ -123,11 +139,12 @@ class ISolarCloudSensor(CoordinatorEntity, SensorEntity):
         # Get initial sensor value from coordinator
         if (
             self.coordinator.data
-            and self.id in self.coordinator.data
-            and self.coordinator.data[self.id].get("value") is not None
+            and self.plant_id in self.coordinator.data
+            and self.id in self.coordinator.data[self.plant_id]
+            and self.coordinator.data[self.plant_id][self.id].get("value") is not None
         ):
             self._attr_native_value = self._value_transform(
-                self.coordinator.data[self.id]["value"]
+                self.coordinator.data[self.plant_id][self.id]["value"]
             )
             self._attr_available = True
 
@@ -136,11 +153,12 @@ class ISolarCloudSensor(CoordinatorEntity, SensorEntity):
         """Handle updated data from the coordinator."""
         if (
             self.coordinator.data
-            and self.id in self.coordinator.data
-            and self.coordinator.data[self.id].get("value") is not None
+            and self.plant_id in self.coordinator.data
+            and self.id in self.coordinator.data[self.plant_id]
+            and self.coordinator.data[self.plant_id][self.id].get("value") is not None
         ):
             self._attr_native_value = self._value_transform(
-                self.coordinator.data[self.id]["value"]
+                self.coordinator.data[self.plant_id][self.id]["value"]
             )
             self._attr_available = True
         else:
@@ -152,7 +170,9 @@ class ISolarCloudSensor(CoordinatorEntity, SensorEntity):
 class Coordinator(DataUpdateCoordinator):
     """Update Coordinator."""
 
-    def __init__(self, hass: HomeAssistant, config_entry: ConfigType) -> None:
+    def __init__(
+        self, hass: HomeAssistant, config_entry: ConfigType, plant_ids: list[str]
+    ) -> None:
         """Initialize my coordinator."""
         if config_entry.options and "update_interval" in config_entry.options:
             update_interval = timedelta(
@@ -173,47 +193,31 @@ class Coordinator(DataUpdateCoordinator):
             update_interval=update_interval,
             always_update=False,
         )
-        self.plant_id = config_entry.data["plant"]
+        self.plant_ids = plant_ids
         self.plants_api: Plants = config_entry.runtime_data.api
-        self.plant_name = None
+        self.plant_names = {}
 
     async def _async_setup(self):
-        """Set up the coordinator.
-
-        This is the place to set up your coordinator,
-        or to load data, that only needs to be loaded once.
-
-        This method will be called automatically during
-        coordinator.async_config_entry_first_refresh.
-        """
-        data = await self.plants_api.async_get_plant_details(self.plant_id)
-        pdata = data[0]
-        self.plant_name = pdata["ps_name"]
+        """Set up the coordinator for all plants."""
+        data = await self.plants_api.async_get_plants()
+        for plant in data:
+            self.plant_names[str(plant["ps_id"])] = plant["ps_name"]
 
     async def _async_update_data(self):
-        """Fetch data from API endpoint.
-
-        This is the place to pre-process the data to lookup tables
-        so entities can quickly look up their data.
-        """
+        """Fetch data from API endpoint for all plants."""
         try:
-            # Note: asyncio.TimeoutError and aiohttp.ClientError are already
-            # handled by the data update coordinator.
             async with asyncio.timeout(10):
                 data = await self.plants_api.async_get_realtime_data(
-                    self.plant_id, measure_points=ALL_SENSORS
+                    self.plant_ids, measure_points=ALL_SENSORS
                 )
-                _LOGGER.debug("Data: %s", data)
-                p = self.plant_id
-                if p in data:
-                    return data[p]
-                raise UpdateFailed(f"Plant not found in data: {data}")
-        #        except ApiAuthError as err:
-        # Raising ConfigEntryAuthFailed will cancel future updates
-        # and start a config flow with SOURCE_REAUTH (async_step_reauth)
-        #            raise ConfigEntryAuthFailed from err
+                _LOGGER.debug("Data retrieved: %s", data)
+                return data
         except PySolarCloudException as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
+
+    def plant_name(self, plant_id: str) -> str:
+        """Get the name of a plant by its ID."""
+        return self.plant_names.get(plant_id, f"Plant {plant_id}")
 
     @lru_cache
     def get_entity_id(self, unique_id):

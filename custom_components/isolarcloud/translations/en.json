@@ -5,10 +5,17 @@
         "title": "Choose authentication provider"
       },
       "user": {
-        "title": "Select server",
+        "title": "Select iSolarCloud server",
         "description": "Select the server you want to connect to",
         "data": {
           "server": "iSolarCloud server"
+        }
+      },
+      "select_plants": {
+        "title": "Select Plants",
+        "description": "Select the plants you want to connect.",
+        "data": {
+          "plants": "Plants"
         }
       }
     },

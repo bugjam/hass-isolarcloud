@@ -20,6 +20,12 @@ import_historical_data:
       required: false
       selector:
         boolean:
+    plant:
+      name: Plant
+      description: The plant to import data for. (Needed if you have multiple plants.)
+      required: false
+      selector:
+        text:
 list_data_points:
   name: List data points
   description: "List all available data points from iSolarCloud."
@@ -31,3 +37,9 @@ list_data_points:
       selector:
         text:
           multiple: true
+    plant:
+      name: Plant
+      description: The plant to get data for. (Needed if you have multiple plants.)
+      required: false
+      selector:
+        text:
