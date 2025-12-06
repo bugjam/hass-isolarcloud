@@ -84,10 +84,10 @@
         "name": "Batteriniveau"
       },
       "daily_yield": {
-        "name": "Täglich erzeugte Energie"
+        "name": "Dagens produktion"
       },
       "power_fraction": {
-        "name": "Leistungsanteil W/Wp"
+        "name": "Ydelse W/Wp"
       }
     }
   }
