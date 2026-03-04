@@ -220,7 +220,7 @@ class Coordinator(DataUpdateCoordinator):
             self.plant_names[str(plant["ps_id"])] = plant["ps_name"]
 
     async def _async_update_data(self):
-        """Fetch data from API endpoint for all plants."""
+        """Fetch data from the API endpoint for all plants."""
         try:
             async with asyncio.timeout(10):
                 data = await self.plants_api.async_get_realtime_data(

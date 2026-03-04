@@ -17,7 +17,7 @@ from .const import DOMAIN
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
-    """Options flow for setting update interval."""
+    """Options flow for setting an update interval."""
 
     OPTIONS_SCHEMA = vol.Schema(
         {

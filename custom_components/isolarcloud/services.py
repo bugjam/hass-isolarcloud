@@ -167,7 +167,7 @@ async def async_delete_statistics_range(
     hass: HomeAssistant, statistic_id, start_time, end_time
 ):
     """Delete existing statistics rows for a statistic_id in a given time range."""
-    # Add job to the executor to avoid blocking the event loop
+    # Add a job to the executor to avoid blocking the event loop
     await get_instance(hass).async_add_executor_job(
         _delete_statistics_range_blocking,
         hass,

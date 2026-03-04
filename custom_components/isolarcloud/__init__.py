@@ -64,7 +64,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ISolarCloudConfigEntry) 
         entry.data["client_secret"],
         entry.data["plant"],
     )
-    # Fetch access token - this triggers token refresh or re-authentcation if needed
+    # Fetch access token - this triggers token refresh or re-authentication if needed
     await auth.async_get_access_token()
 
     plants = entry.data.get("plants", [entry.data["plant"]])
@@ -117,5 +117,5 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload integration when options are updated (e.g. changed update_interval)."""
+    """Reload integration when options are updated (e.g., changed update_interval)."""
     hass.config_entries.async_schedule_reload(entry.entry_id)
