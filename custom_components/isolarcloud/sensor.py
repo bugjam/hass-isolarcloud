@@ -68,9 +68,8 @@ async def async_setup_entry(
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Set up the sensor platform."""
-    plants = config.data.get("plants", [config.data["plant"]])
-    coordinator = Coordinator(hass, config, plants)
-    await coordinator.async_config_entry_first_refresh()
+    coordinator = config.runtime_data.coordinator
+    plants = coordinator.plant_ids
 
     # Register services from services.py
     await async_register_services(
@@ -184,7 +183,11 @@ class Coordinator(DataUpdateCoordinator):
     """Update Coordinator."""
 
     def __init__(
-        self, hass: HomeAssistant, config_entry: ConfigType, plant_ids: list[str]
+        self,
+        hass: HomeAssistant,
+        config_entry: ConfigType,
+        plant_ids: list[str],
+        plants_api: Plants,
     ) -> None:
         """Initialize my coordinator."""
         if config_entry.options and "update_interval" in config_entry.options:
@@ -207,7 +210,7 @@ class Coordinator(DataUpdateCoordinator):
             always_update=False,
         )
         self.plant_ids = plant_ids
-        self.plants_api: Plants = config_entry.runtime_data.api
+        self.plants_api = plants_api
         self.plant_names = {}
 
     async def _async_setup(self):
