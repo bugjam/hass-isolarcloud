@@ -69,7 +69,7 @@
         "name": "Produced energy"
       },
       "total_direct_energy_consumption": {
-        "name": "Direct comsumption"
+        "name": "Direct consumption"
       },
       "power": {
         "name": "Power flow"
