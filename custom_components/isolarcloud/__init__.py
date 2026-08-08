@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import logging
 
 import voluptuous as vol
@@ -13,6 +14,7 @@ from homeassistant.helpers import aiohttp_client, config_entry_oauth2_flow
 
 from . import api
 from .const import DOMAIN
+from .sensor import Coordinator
 
 _LOGGER = logging.getLogger(__name__)
 _PLATFORMS: list[Platform] = [Platform.SENSOR]
@@ -33,7 +35,15 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-type ISolarCloudConfigEntry = ConfigEntry[api.AsyncConfigEntryAuth]
+@dataclass
+class RuntimeData:
+    """Runtime data stored on the config entry."""
+
+    auth: api.AsyncConfigEntryAuth
+    coordinator: Coordinator
+
+
+type ISolarCloudConfigEntry = ConfigEntry[RuntimeData]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ISolarCloudConfigEntry) -> bool:
@@ -46,7 +56,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ISolarCloudConfigEntry) 
 
     session = config_entry_oauth2_flow.OAuth2Session(hass, entry, implementation)
 
-    entry.runtime_data = api.AsyncConfigEntryAuth(
+    auth = api.AsyncConfigEntryAuth(
         aiohttp_client.async_get_clientsession(hass),
         session,
         entry.data["server"],
@@ -55,7 +65,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ISolarCloudConfigEntry) 
         entry.data["plant"],
     )
     # Fetch access token - this triggers token refresh or re-authentcation if needed
-    await entry.runtime_data.async_get_access_token()
+    await auth.async_get_access_token()
+
+    plants = entry.data.get("plants", [entry.data["plant"]])
+    coordinator = Coordinator(hass, entry, plants, auth.api)
+    # Do the first refresh here, in the top-level entry setup, *before*
+    # forwarding to the sensor platform. If this raises ConfigEntryNotReady,
+    # it needs to propagate from here so Home Assistant's automatic
+    # retry-with-backoff applies. Previously this call lived inside
+    # sensor.async_setup_entry (the forwarded platform setup), where
+    # raising ConfigEntryNotReady doesn't trigger that retry mechanism —
+    # HA just logs an error and leaves the entry "loaded" with permanently
+    # unavailable entities after any transient failure (e.g. a DNS blip),
+    # requiring a manual reload or restart to recover.
+    await coordinator.async_config_entry_first_refresh()
+
+    entry.runtime_data = RuntimeData(auth=auth, coordinator=coordinator)
 
     await hass.config_entries.async_forward_entry_setups(entry, _PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(update_listener))
