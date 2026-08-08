@@ -7,9 +7,11 @@ from itertools import groupby
 import logging
 
 from pysolarcloud.plants import Plants
+from sqlalchemy import delete, select
 import voluptuous as vol
 
 from homeassistant.components.recorder import get_instance
+from homeassistant.components.recorder.db_schema import Statistics, StatisticsMeta
 from homeassistant.components.recorder.models import StatisticData, StatisticMetaData
 from homeassistant.components.recorder.statistics import (
     async_import_statistics,
@@ -181,38 +183,33 @@ def _delete_statistics_range_blocking(
     hass: HomeAssistant, statistic_id: str, start_time: datetime, end_time: datetime
 ):
     """Delete existing statistics rows for a statistic_id in a given time range."""
-    db = get_instance(hass).async_get_database_engine()
-    connection = db.raw_connection()
-    try:
-        cursor = connection.cursor()
+    recorder = get_instance(hass)
+    with recorder.get_session() as session:
         start_ts = start_time.timestamp()
         end_ts = end_time.timestamp()
-        cursor.execute(
-            "SELECT id FROM statistics_meta WHERE statistic_id = ?", (statistic_id,)
+        metadata_id = session.scalar(
+            select(StatisticsMeta.id).where(
+                StatisticsMeta.statistic_id == statistic_id
+            )
         )
-        result = cursor.fetchone()
-        if not result:
+        if metadata_id is None:
             _LOGGER.warning("No metadata_id found for statistic_id %s", statistic_id)
             return
-        metadata_id = result[0]
         _LOGGER.warning(
             "Deleting statistics for metadata_id %s between %s and %s",
             metadata_id,
             start_time,
             end_time,
         )
-        cursor.execute(
-            "DELETE FROM statistics WHERE metadata_id = ? AND start_ts >= ? AND start_ts < ?",
-            (metadata_id, start_ts, end_ts),
+        session.execute(
+            delete(Statistics).where(
+                Statistics.metadata_id == metadata_id,
+                Statistics.start_ts >= start_ts,
+                Statistics.start_ts < end_ts,
+            )
         )
-        connection.commit()
+        session.commit()
         _LOGGER.debug("Deletion completed")
-    except Exception as e:
-        _LOGGER.error("Error while deleting statistics", exc_info=e)
-        connection.rollback()
-    finally:
-        cursor.close()
-        connection.close()
 
 
 async def async_register_services(
