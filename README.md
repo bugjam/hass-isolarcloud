@@ -34,7 +34,7 @@ It's possible that other plant types offer different data points which may requi
 
 ## Configuration
 
-1. Create an account in the [Sungrow Developer Portal](https://developer-api.isolarcloud.com/)
+1. Create an account in the [Sungrow Developer Portal](https://developer-api.isolarcloud.com/). For systems registered in India, use the [Indian Sungrow Developer Portal](https://developer-api.isolarcloud.in/) instead.
 2. Create a new app
 3. Enable the "Authorize with OAuth2.0" setting and enter this Redirect URI: `https://my.home-assistant.io/redirect/oauth` [^1]
 4. Wait for Sungrow to approve your app
@@ -50,7 +50,7 @@ The integration can be installed with [HACS](https://hacs.xyz):
 2. Install *iSolarCloud* from the HACS store
 3. Restart HomeAssistant
 4. Install *iSolarCloud* in HomeAssistant: Settings -> Integrations -> Add integration
-5. Select your iSolarCloud server
+5. Select your iSolarCloud server. For systems registered in India, select *India*.
 6. The integration uses HomeAssistant's [Application Credentials](https://www.home-assistant.io/integrations/application_credentials/) integration to manage the OAuth2 configuration. You will be prompted to enter *Client Id* and *Client Secret*
    * *Client Id* must contain two values from the Sungrow developer portal: *ApplicationId* and *Appkey*, separated by a `@`. Example: `499@586FEE69FC005B17361AB992FC5B1CEA`
       NOTE: The *ApplicationID* can be found in the URL when viewing the details of your now-approved Sungrow App in the developer portal.

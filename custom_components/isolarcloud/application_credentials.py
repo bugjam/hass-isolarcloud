@@ -71,6 +71,9 @@ class OAuth2Impl(AbstractAuth, AbstractOAuth2Implementation):
             case Server.Australia.value:
                 cloud_id = 7
                 cloud_url = "https://auweb3.isolarcloud.com/#/authorized-app"
+            case Server.India.value:
+                cloud_id = 9
+                cloud_url = "https://web3.isolarcloud.in/#/authorized-app"
             case _:
                 _LOGGER.error("Unknown server: %s", self.server)
                 raise ConfigEntryAuthFailed(f"Unknown server: {self.server}")

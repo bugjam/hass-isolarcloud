@@ -19,9 +19,9 @@
     "pysolarcloud"
   ],
   "requirements": [
-    "pysolarcloud==0.2.1"
+    "pysolarcloud==0.5.0"
   ],
   "ssdp": [],
-  "version": "0.9.1",
+  "version": "0.10.0",
   "zeroconf": []
 }
